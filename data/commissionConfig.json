@@ -1,0 +1,25 @@
+{
+  "designerXiaohongshu": "YoloVibes_Design",
+  "categories": {
+    "postcards": {
+      "price": "¥100 起",
+      "duration": "3-5 天",
+      "notes": "1. 请提供风格参考图或详细描述\n2. 包含2次免费修改\n3. 交付格式：JPG + PSD\n4. 可商用，需署名"
+    },
+    "tapes": {
+      "price": "¥150 起",
+      "duration": "5-7 天",
+      "notes": "1. 需提供具体尺寸和素材\n2. 包含3次免费修改\n3. 交付格式：PNG + AI"
+    },
+    "cards": {
+      "price": "¥80 起",
+      "duration": "2-4 天",
+      "notes": "1. 主题自定，需提前沟通\n2. 包含1次免费修改\n3. 交付格式：JPG"
+    },
+    "others": {
+      "price": "面议",
+      "duration": "视具体需求",
+      "notes": "其他类型设计请私信详谈。"
+    }
+  }
+}

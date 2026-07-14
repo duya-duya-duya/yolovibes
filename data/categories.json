@@ -1,0 +1,5 @@
+[
+  { "id": "postcards", "name": "明信片设计", "order": 1 },
+  { "id": "tapes", "name": "磁带盒设计", "order": 2 },
+  { "id": "others", "name": "其他设计", "order": 3 }
+]

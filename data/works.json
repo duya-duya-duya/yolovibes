@@ -1,0 +1,33 @@
+{
+  "postcards": [
+    {
+      "id": "postcards_1783959000088",
+      "name": "蒲熠星",
+      "image": "/images/postcards/puyixing.png"
+    },
+    {
+      "id": "postcards_1783959014361",
+      "name": "尹净汉",
+      "image": "/images/postcards/yinjinghan.png"
+    }
+  ],
+  "tapes": [
+    {
+      "id": "tapes_1783957773097",
+      "name": "单依纯",
+      "image": "/images/tapes/shanyichun.png"
+    },
+    {
+      "id": "tapes_1783957800670",
+      "name": "薛之谦",
+      "image": "/images/tapes/xuezhiqian.png"
+    }
+  ],
+  "others": [
+    {
+      "id": "others_1783959031079",
+      "name": "TWS",
+      "image": "/images/others/TWS.png"
+    }
+  ]
+}
