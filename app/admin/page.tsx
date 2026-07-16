@@ -1,5 +1,6 @@
 // app/admin/page.tsx
 'use client';
+import { Suspense } from 'react'; // 1. 导入 Suspense
 import { useSearchParams } from 'next/navigation';
 import AdminLayout from '@/components/admin/AdminLayout';
 import IntroEditor from '@/components/admin/IntroEditor';
@@ -7,7 +8,7 @@ import CategoryManager from '@/components/admin/CategoryManager';
 import WorksManager from '@/components/admin/WorksManager';
 import CommissionConfigEditor from '@/components/admin/CommissionConfigEditor';
 
-export default function AdminPage() {
+function AdminContent() {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') || 'intro';
 
@@ -34,5 +35,13 @@ export default function AdminPage() {
         </div>
       </div>
     </AdminLayout>
+  );
+}
+
+export default function AdminPage() {
+  return (
++    <Suspense fallback={<div>加载中...</div>}> {/* 2. 添加 Suspense 边界 */}
+       <AdminContent />
++    </Suspense>
   );
 }
