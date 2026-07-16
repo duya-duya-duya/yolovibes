@@ -17,7 +17,7 @@ export default function CommissionConfigEditor() {
   }, []);
 
   const updateCategory = (id: string, field: string, value: string) => {
-    setConfig(prev => any ({
+    setConfig((prev: any) => ({
       ...prev,
       categories: {
         ...prev.categories,
