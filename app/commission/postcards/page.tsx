@@ -106,3 +106,28 @@ export default function CommissionPage() {
     </div>
   );
 }
+// 在 app/commission/[type]/page.tsx 末尾添加
+
+// 构建时预生成所有分类的定稿页
+export async function generateStaticParams() {
+  try {
+    // 从 Supabase 或 API 获取分类列表
+    const res = await fetch(
+      process.env.NODE_ENV === 'production'
+        ? 'https://yolovibes-dl34-ashen.vercel.app/api/public/content?file=categories.json'
+        : 'http://localhost:3000/api/public/content?file=categories.json'
+    );
+    const categories = await res.json();
+    
+    // 返回每个分类的 type 参数
+    return categories.map((cat: any) => ({
+      type: cat.id,
+    }));
+  } catch (error) {
+    console.error('生成静态路径失败:', error);
+    return [];
+  }
+}
+
+// 可选：强制动态渲染（如果内容更新频繁，可以移除这行）
+// export const dynamic = 'force-dynamic';
