@@ -1,29 +1,25 @@
 // app/commission/postcards/page.tsx
-// 删除顶部的 'use client'
+// 确保文件顶部没有 'use client' 指令
 
 import InteractiveOrderForm from './InteractiveOrderForm';
 
-// 获取配置数据的函数（服务端执行）
+// 在服务端获取配置数据
 async function getConfig(type: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
-    : 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/config?type=${type}`);
-  if (!res.ok) throw new Error('Failed to fetch config');
-  return res.json();
+    // ... 你原有的数据获取逻辑
 }
 
 export default async function CommissionPage() {
-  const type = 'postcards'; // 固定为当前分类
-  const config = await getConfig(type);
-  
-  // 将数据传给客户端组件
-  return <InteractiveOrderForm config={config} type={type} />;
+    const type = 'postcards';
+    const config = await getConfig(type);
+
+    // 将数据作为 props 传递给客户端组件
+    return <InteractiveOrderForm config={config} type={type} />;
 }
 
-// generateStaticParams 可以保留（仅在服务端构建时执行）
+// generateStaticParams 现在可以安全地在这里使用了
 export async function generateStaticParams() {
-  // 如果使用动态路由，这里返回所有分类的 type
-  // 但因为是静态分类，可以省略或返回空数组
-  return [];
+    // ... 你原有的静态路径生成逻辑
+    // 注意：即使这里返回空数组也可能导致构建错误[reference:6]
+    // 建议确保它至少返回一个有效的路径参数
+    return [{ type: 'postcards' }];
 }
