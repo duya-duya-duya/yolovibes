@@ -1,133 +1,29 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+// app/commission/postcards/page.tsx
+// 删除顶部的 'use client'
 
-export default function CommissionPage() {
-  const params = useParams();
-  const type = params.type as string;
+import InteractiveOrderForm from './InteractiveOrderForm';
 
-  const [config, setConfig] = useState<any>(null);
-  const [xiaohongshu, setXiaohongshu] = useState('');
-  const [requirements, setRequirements] = useState('');
-
-  // 获取配置
-  useEffect(() => {
-    fetch(`/api/config?type=${type}`)
-      .then(res => res.json())
-      .then(setConfig);
-  }, [type]);
-
-  // 读取 localStorage 备忘录
-  useEffect(() => {
-    const saved = localStorage.getItem(`draft_${type}`);
-    if (saved) {
-      try {
-        const { xhs, req } = JSON.parse(saved);
-        setXiaohongshu(xhs || '');
-        setRequirements(req || '');
-      } catch (e) {}
-    }
-  }, [type]);
-
-  // 自动保存备忘录
-  useEffect(() => {
-    localStorage.setItem(`draft_${type}`, JSON.stringify({ xhs: xiaohongshu, req: requirements }));
-  }, [xiaohongshu, requirements, type]);
-
-  const copyDesignerID = () => {
-    const id = config?.designerXiaohongshu || 'YoloVibes_Design';
-    navigator.clipboard.writeText(id);
-    alert('已复制设计师小红书账号，请打开APP搜索私信！');
-  };
-
-  const openXiaohongshu = () => {
-    const id = config?.designerXiaohongshu || 'YoloVibes_Design';
-    // 尝试 URL Scheme 唤起
-    window.location.href = `xiaohongshu://user?userId=${id}`;
-    setTimeout(() => {
-      alert('如果未能自动唤起，请复制账号手动搜索。');
-    }, 2000);
-  };
-
-  if (!config) return <div className="text-center p-10">加载中...</div>;
-
-  return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6 pb-32">
-      <h1 className="text-2xl font-bold">📝 {config.categoryName} 定稿</h1>
-
-      {/* 价格与时长 */}
-      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-        <p className="text-lg font-semibold">💰 参考价格：{config.price}</p>
-        <p className="text-lg font-semibold">⏳ 预计完成：{config.duration}</p>
-      </div>
-
-      {/* 注意事项 */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="font-bold text-blue-800">📋 约稿注意事项</h3>
-        <div className="whitespace-pre-wrap text-sm text-gray-700 mt-2">
-          {config.notes}
-        </div>
-      </div>
-
-      {/* 本地备忘录 */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
-        <p className="text-xs text-gray-400">✏️ 以下信息仅保存在你的浏览器中，方便沟通时参考</p>
-        <input
-          type="text"
-          placeholder="你的小红书账号"
-          className="w-full border p-3 rounded"
-          value={xiaohongshu}
-          onChange={(e) => setXiaohongshu(e.target.value)}
-        />
-        <textarea
-          placeholder="你的稿件要求（风格/尺寸/用途等）"
-          rows={4}
-          className="w-full border p-3 rounded"
-          value={requirements}
-          onChange={(e) => setRequirements(e.target.value)}
-        />
-      </div>
-
-      {/* 固定底部的联系按钮 */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg flex flex-col gap-3 lg:static lg:shadow-none lg:border-t-0 lg:flex-row">
-        <button
-          onClick={copyDesignerID}
-          className="flex-1 bg-gray-200 py-3 rounded-lg font-medium"
-        >
-          📋 复制设计师账号
-        </button>
-        <button
-          onClick={openXiaohongshu}
-          className="flex-1 bg-red-500 text-white py-3 rounded-lg font-medium shadow-lg"
-        >
-          📱 打开小红书 联系我
-        </button>
-      </div>
-    </div>
-  );
+// 获取配置数据的函数（服务端执行）
+async function getConfig(type: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
+    : 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/api/config?type=${type}`);
+  if (!res.ok) throw new Error('Failed to fetch config');
+  return res.json();
 }
-// 在 app/commission/[type]/page.tsx 末尾添加
 
-// 构建时预生成所有分类的定稿页
+export default async function CommissionPage() {
+  const type = 'postcards'; // 固定为当前分类
+  const config = await getConfig(type);
+  
+  // 将数据传给客户端组件
+  return <InteractiveOrderForm config={config} type={type} />;
+}
+
+// generateStaticParams 可以保留（仅在服务端构建时执行）
 export async function generateStaticParams() {
-  try {
-    // 从 Supabase 或 API 获取分类列表
-    const res = await fetch(
-      process.env.NODE_ENV === 'production'
-        ? 'https://yolovibes-dl34-ashen.vercel.app/api/public/content?file=categories.json'
-        : 'http://localhost:3000/api/public/content?file=categories.json'
-    );
-    const categories = await res.json();
-    
-    // 返回每个分类的 type 参数
-    return categories.map((cat: any) => ({
-      type: cat.id,
-    }));
-  } catch (error) {
-    console.error('生成静态路径失败:', error);
-    return [];
-  }
+  // 如果使用动态路由，这里返回所有分类的 type
+  // 但因为是静态分类，可以省略或返回空数组
+  return [];
 }
-
-// 可选：强制动态渲染（如果内容更新频繁，可以移除这行）
-// export const dynamic = 'force-dynamic';
