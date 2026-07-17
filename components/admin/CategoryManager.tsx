@@ -8,9 +8,16 @@ export default function CategoryManager() {
   const [loading, setLoading] = useState(false);
 
   const loadData = async () => {
-    const res = await fetch('/api/admin/content?file=categories.json');
-    const data = await res.json();
-    setCategories(data);
+    try {
+      const res = await fetch('/api/admin/content?file=categories.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      // ✅ 确保 data 是数组
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('加载分类数据失败:', error);
+      setCategories([]);
+    }
   };
 
   useEffect(() => {
@@ -21,31 +28,43 @@ export default function CategoryManager() {
     if (!newName.trim()) return;
     setLoading(true);
     const newId = newName.toLowerCase().replace(/\s+/g, '_');
-    const newCat = { id: newId, name: newName.trim(), order: categories.length + 1 };
-    const updated = [...categories, newCat];
-    await fetch('/api/admin/content', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file: 'categories.json', data: updated }),
-    });
-    // 同时需要在 works.json 和 commissionConfig.json 中添加空条目，以免出错
-    // 简单起见，我们只提示
-    setCategories(updated);
-    setNewName('');
+    // ✅ 确保 categories 是数组再取 length
+    const currentCategories = Array.isArray(categories) ? categories : [];
+    const newCat = { id: newId, name: newName.trim(), order: currentCategories.length + 1 };
+    const updated = [...currentCategories, newCat];
+    
+    try {
+      await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: 'categories.json', data: updated }),
+      });
+      setCategories(updated);
+      setNewName('');
+      alert('✅ 分类已添加');
+    } catch (error) {
+      alert('❌ 添加失败');
+      console.error(error);
+    }
     setLoading(false);
-    alert('分类已添加，请手动在 works.json 和 commissionConfig.json 中补充对应数据（或重启服务）');
   };
 
   const deleteCategory = async (id: string) => {
     if (!confirm('确定要删除吗？')) return;
-    const updated = categories.filter(c => c.id !== id);
-    await fetch('/api/admin/content', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file: 'categories.json', data: updated }),
-    });
-    setCategories(updated);
-    alert('已删除，请同步清理 works.json 和 commissionConfig.json 中的相关条目');
+    const currentCategories = Array.isArray(categories) ? categories : [];
+    const updated = currentCategories.filter(c => c.id !== id);
+    try {
+      await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file: 'categories.json', data: updated }),
+      });
+      setCategories(updated);
+      alert('✅ 已删除');
+    } catch (error) {
+      alert('❌ 删除失败');
+      console.error(error);
+    }
   };
 
   return (
@@ -63,12 +82,15 @@ export default function CategoryManager() {
         </button>
       </div>
       <ul className="divide-y">
-        {categories.map(cat => (
+        {Array.isArray(categories) && categories.map(cat => (
           <li key={cat.id} className="flex justify-between items-center py-2">
             <span>{cat.name} (ID: {cat.id})</span>
             <button onClick={() => deleteCategory(cat.id)} className="text-red-500 text-sm">删除</button>
           </li>
         ))}
+        {(!Array.isArray(categories) || categories.length === 0) && (
+          <li className="py-2 text-gray-400 text-sm">暂无分类</li>
+        )}
       </ul>
     </div>
   );

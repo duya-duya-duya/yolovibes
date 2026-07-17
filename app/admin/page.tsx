@@ -1,6 +1,6 @@
 // app/admin/page.tsx
 'use client';
-import { Suspense } from 'react'; // 1. 导入 Suspense
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AdminLayout from '@/components/admin/AdminLayout';
 import IntroEditor from '@/components/admin/IntroEditor';
@@ -27,21 +27,13 @@ function AdminContent() {
       content = <IntroEditor />;
   }
 
-  return (
-    <AdminLayout>
-      <div className="max-w-5xl mx-auto">
-        <div className="glass-card p-6 rounded-2xl">
-          {content}
-        </div>
-      </div>
-    </AdminLayout>
-  );
+  return <AdminLayout currentTab={tab}>{content}</AdminLayout>;
 }
 
 export default function AdminPage() {
   return (
-+    <Suspense fallback={<div>加载中...</div>}> {/* 2. 添加 Suspense 边界 */}
-       <AdminContent />
-+    </Suspense>
+    <Suspense fallback={<div className="p-6 text-center text-gray-500">加载中...</div>}>
+      <AdminContent />
+    </Suspense>
   );
 }

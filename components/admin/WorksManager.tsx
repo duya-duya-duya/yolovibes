@@ -16,13 +16,17 @@ export default function WorksManager() {
         fetch('/api/admin/content?file=categories.json').then(r => r.json()),
         fetch('/api/admin/content?file=works.json').then(r => r.json()),
       ]);
-      setCategories(cats || []);
+      // ✅ 确保数据格式正确
+      const categoriesData = Array.isArray(cats) ? cats : [];
+      setCategories(categoriesData);
       setWorks(wks || {});
-      if (cats && cats.length > 0 && !selectedCategory) {
-        setSelectedCategory(cats[0].id);
+      if (categoriesData.length > 0 && !selectedCategory) {
+        setSelectedCategory(categoriesData[0].id);
       }
     } catch (error) {
       console.error('加载数据失败:', error);
+      setCategories([]);
+      setWorks({});
     }
   };
 
@@ -77,7 +81,6 @@ export default function WorksManager() {
     }
   };
 
-  // 当选中分类变化时，重置当前作品列表（防止残留）
   const handleCategoryChange = (catId: string) => {
     setSelectedCategory(catId);
   };
@@ -88,9 +91,8 @@ export default function WorksManager() {
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-gray-800">📁 作品管理</h2>
 
-      {/* 分类切换 */}
       <div className="flex flex-wrap gap-2">
-        {categories.map((cat) => (
+        {Array.isArray(categories) && categories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => handleCategoryChange(cat.id)}
@@ -103,17 +105,16 @@ export default function WorksManager() {
             {cat.name}
           </button>
         ))}
-        {categories.length === 0 && (
+        {(!Array.isArray(categories) || categories.length === 0) && (
           <p className="text-gray-400 text-sm">暂无分类，请先在「分类管理」中添加</p>
         )}
       </div>
 
-      {/* 当前分类下的作品列表 */}
       {selectedCategory && (
         <>
           <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
             <h3 className="font-semibold text-gray-700">
-              ➕ 新增作品（分类：{categories.find(c => c.id === selectedCategory)?.name || selectedCategory}）
+              ➕ 新增作品（分类：{Array.isArray(categories) ? categories.find(c => c.id === selectedCategory)?.name || selectedCategory : selectedCategory}）
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input
@@ -138,14 +139,13 @@ export default function WorksManager() {
             </button>
           </div>
 
-          {/* 作品列表 */}
           <ul className="divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden">
             {currentWorks.length === 0 ? (
               <li className="p-4 text-center text-gray-400 text-sm">该分类下暂无作品</li>
             ) : (
               currentWorks.map((item: any) => (
                 <li
-                  key={`${selectedCategory}_${item.id}`}  // ✅ 组合 key，避免重复
+                  key={`${selectedCategory}_${item.id}`}
                   className="flex justify-between items-center p-4 hover:bg-gray-50 transition"
                 >
                   <div className="flex items-center gap-4">
