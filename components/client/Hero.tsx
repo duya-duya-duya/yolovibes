@@ -2,7 +2,7 @@ export default function Hero() {
   return (
     <div className="text-center space-y-6">
       <div className="inline-block p-4 rounded-full bg-white/30 backdrop-blur-sm">
-        <h1 className="text-6xl md:text-8xl font-extrabold text-gradient">
+        <h1 className="text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
           YoloVibes
         </h1>
       </div>

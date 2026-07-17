@@ -1,16 +1,53 @@
-import fs from 'fs';
-import path from 'path';
+// lib/data.ts
+import { supabase } from './supabase';
 
-const dataDir = path.join(process.cwd(), 'data');
-
-export function readJSONFile(filename: string) {
-  const filePath = path.join(dataDir, filename);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(content);
+export async function getContentKey(key: string) {
+  const { data, error } = await supabase
+    .from('content')
+    .select('value')
+    .eq('key', key)
+    .single();
+  if (error) throw new Error(`Failed to fetch ${key}: ${error.message}`);
+  return data.value;
 }
 
-export function writeJSONFile(filename: string, data: any) {
-  const filePath = path.join(dataDir, filename);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-  return true;
+export async function getIntroContent() {
+  return getContentKey('content');
+}
+
+export async function getCategories() {
+  return getContentKey('categories');
+}
+
+export async function getWorks() {
+  return getContentKey('works');
+}
+
+export async function getCommissionConfig() {
+  return getContentKey('commissionConfig');
+}
+
+export async function getHomePageData() {
+  const [content, categories, works] = await Promise.all([
+    getIntroContent(),
+    getCategories(),
+    getWorks(),
+  ]);
+  return { content, categories, works };
+}
+
+export async function getCommissionPageData(type: string) {
+  const [categories, config] = await Promise.all([
+    getCategories(),
+    getCommissionConfig(),
+  ]);
+  const category = categories.find((c: any) => c.id === type);
+  const categoryConfig = config.categories?.[type] || {};
+  return {
+    categoryName: category?.name || type,
+    designerXiaohongshu: config.designerXiaohongshu || '',
+    price: categoryConfig.price || '面议',
+    duration: categoryConfig.duration || '待定',
+    notes: categoryConfig.notes || '暂无说明',
+  };
 }

@@ -1,22 +1,26 @@
+// app/page.tsx
+import { getHomePageData } from '@/lib/data';
 import Hero from '@/components/client/Hero';
 import Intro from '@/components/client/Intro';
 import Gallery from '@/components/client/Gallery';
 import CommissionButtons from '@/components/client/CommissionButtons';
 
-export default function Home() {
+export default async function HomePage() {
+  const { content, categories, works } = await getHomePageData();
+
   return (
     <div className="snap-y snap-mandatory h-screen overflow-y-scroll scroll-smooth">
       <section id="hero" className="snap-start min-h-screen flex items-center justify-center">
         <Hero />
       </section>
       <section id="intro" className="snap-start min-h-screen flex items-center justify-center">
-        <Intro />
+        <Intro content={content} />
       </section>
       <section id="gallery" className="snap-start min-h-screen flex items-center justify-center">
-        <Gallery />
+        <Gallery categories={categories} works={works} />
       </section>
       <section id="commission" className="snap-start min-h-screen flex items-center justify-center">
-        <CommissionButtons />
+        <CommissionButtons categories={categories} works={works} />
       </section>
     </div>
   );
